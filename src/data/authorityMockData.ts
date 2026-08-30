@@ -626,6 +626,12 @@ export const mapLayers: MapLayer[] = [
   { id: 'flood-risk', label: 'Flood Risk', type: 'flood-risk', enabled: true },
   { id: 'rainfall', label: 'Rainfall', type: 'rainfall', enabled: true },
   { id: 'terrain', label: 'Terrain / Elevation', type: 'terrain', enabled: false },
+  {
+    id: 'imperviousness',
+    label: 'Imperviousness',
+    type: 'imperviousness',
+    enabled: false,
+  },
   { id: 'drainage', label: 'Drainage Network', type: 'drainage', enabled: false },
   { id: 'roads', label: 'Roads', type: 'roads', enabled: true },
   { id: 'bridges', label: 'Bridges', type: 'bridges', enabled: false },
@@ -636,6 +642,12 @@ export const mapLayers: MapLayer[] = [
   { id: 'shelters', label: 'Shelters', type: 'shelters', enabled: true },
   { id: 'railway', label: 'Railway Stations', type: 'railway', enabled: false },
   { id: 'citizen-reports', label: 'Citizen Reports', type: 'citizen-reports', enabled: true },
+  {
+    id: 'flood-prediction',
+    type: 'flood-prediction',
+    label: 'Flood Prediction',
+    enabled: true,
+  }
 ];
 
 export const timeSliderOptions = [

@@ -150,7 +150,7 @@ export interface AiRecommendation {
 export interface MapLayer {
   id: string;
   label: string;
-  type: 'flood-risk' | 'rainfall' | 'terrain' | 'drainage' | 'roads' | 'bridges' | 'hospitals' | 'police' | 'fire' | 'schools' | 'shelters' | 'railway' | 'citizen-reports';
+  type: 'flood-risk' | 'rainfall' | 'terrain' | 'imperviousness' | 'drainage' | 'roads' | 'bridges' | 'hospitals' | 'police' | 'fire' | 'schools' | 'shelters' | 'railway' | 'citizen-reports';
   enabled: boolean;
 }
 

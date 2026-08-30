@@ -1,5 +1,18 @@
 import { useEffect, useState } from 'react';
-import { FileText, FileSpreadsheet, FileJson, Users, Route, Hospital, School, ShieldAlert } from 'lucide-react';
+import {
+  FileText,
+  FileSpreadsheet,
+  FileJson,
+  Users,
+  Route,
+  Hospital,
+  School,
+  ShieldAlert,
+} from 'lucide-react';
+
+import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import AuthorityLayout from '@/components/authority/AuthorityLayout';
 import { LoadingState } from '@/components/authority/States';
 import {
@@ -38,13 +51,23 @@ function BarChart({ data, title, maxVal = 100, secondary = false }: { data: Char
               {secondary && point.secondary != null && (
                 <div
                   className="w-full rounded-t bg-blue-secondary/40"
-                  style={{ height: `${(point.secondary / maxVal) * 100}%` }}
+                  style={{
+                    height: `${Math.min(
+                      ((point.secondary ?? 0) / maxVal) * 100,
+                      100
+                    )}%`,
+                  }}
                   title={`Rainfall: ${point.secondary}`}
                 />
               )}
               <div
                 className={`w-full rounded-t transition-all duration-300 ${getRiskColor(point.value)}`}
-                style={{ height: `${(point.value / maxVal) * 100}%` }}
+                style={{
+                  height: `${Math.min(
+                    (point.value / maxVal) * 100,
+                    100
+                  )}%`,
+                }}
               />
             </div>
             <span className="text-xs font-medium text-ink-muted">{point.label}</span>
@@ -79,8 +102,93 @@ export default function AuthorityAnalyticsPage() {
   }, []);
 
   const handleExport = (format: string) => {
-    setExportMsg(`Exporting report as ${format}... (prototype simulation)`);
-    setTimeout(() => setExportMsg(null), 2500);
+    const reportData = [
+      {
+        Metric: 'Population Exposed',
+        Value: analyticsData.populationExposed,
+      },
+      {
+        Metric: 'Roads Affected',
+        Value: analyticsData.roadsAffected,
+      },
+      {
+        Metric: 'Hospitals at Risk',
+        Value: analyticsData.hospitalsAtRisk,
+      },
+      {
+        Metric: 'Schools at Risk',
+        Value: analyticsData.schoolsAtRisk,
+      },
+      {
+        Metric: 'Critical Zones',
+        Value: analyticsData.criticalZones,
+      },
+    ];
+
+    if (format === 'CSV') {
+      const worksheet = XLSX.utils.json_to_sheet(reportData);
+      const csv = XLSX.utils.sheet_to_csv(worksheet);
+
+      const blob = new Blob([csv], {
+        type: 'text/csv;charset=utf-8;',
+      });
+
+      saveAs(blob, 'flood-impact-analytics.csv');
+
+      setExportMsg('CSV report downloaded successfully.');
+    }
+
+    if (format === 'Excel') {
+      const worksheet = XLSX.utils.json_to_sheet(reportData);
+
+      const workbook = XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        'Analytics',
+      );
+
+      XLSX.writeFile(
+        workbook,
+        'flood-impact-analytics.xlsx',
+      );
+
+      setExportMsg('Excel report downloaded successfully.');
+    }
+
+    if (format === 'PDF') {
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text(
+        'FLOOD X - Impact Analysis & Analytics',
+        20,
+        20,
+      );
+
+      doc.setFontSize(11);
+
+      let y = 35;
+
+      reportData.forEach((item) => {
+        doc.text(
+          `${item.Metric}: ${item.Value}`,
+          20,
+          y,
+        );
+
+        y += 10;
+      });
+
+      doc.save('flood-impact-analytics.pdf');
+
+      setExportMsg('PDF report downloaded successfully.');
+    }
+
+    setTimeout(() => {
+      setExportMsg(null);
+    }, 2500);
   };
 
   if (loading) {
@@ -106,8 +214,15 @@ export default function AuthorityAnalyticsPage() {
             <button onClick={() => handleExport('Excel')} className="flex items-center gap-1.5 rounded-xl border border-border bg-white px-3 py-2 text-sm font-medium text-ink-muted shadow-card transition-colors hover:bg-blue-light hover:text-navy">
               <FileSpreadsheet className="h-4 w-4" aria-hidden="true" /> Excel
             </button>
-            <button onClick={() => handleExport('CSV')} className="flex items-center gap-1.5 rounded-xl border border-border bg-white px-3 py-2 text-sm font-medium text-ink-muted shadow-card transition-colors hover:bg-blue-light hover:text-navy">
-              <FileJson className="h-4 w-4" aria-hidden="true" /> CSV
+            <button
+              onClick={() => handleExport('CSV')}
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-white px-3 py-2 text-sm font-medium text-ink-muted shadow-card transition-colors hover:bg-blue-light hover:text-navy"
+            >
+              <FileText
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+              CSV
             </button>
           </div>
         </div>
